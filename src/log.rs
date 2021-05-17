@@ -17,18 +17,22 @@ pub fn warn(message: &str) {
 }
 
 const ERROR: &str = "[ ERROR ] ";
-pub fn error(message: &str, abort: bool) {
-    if abort {
-        write(ERROR, message);
-        write(ERROR, "This error will abort the kernel.");
+pub fn error(message: &str, panic: bool) {
+    if panic {
+        error_abort(message);
     } else {
-        write(ERROR, message);
+        error_no_abort(message);
     }
 }
 
-fn error_abort(message: &str) {}
+fn error_abort(message: &str) {
+    write(ERROR, message);
+    write(ERROR, "This error will make the kernel panic.");
+}
 
-fn error_no_abort(message: &str) {}
+fn error_no_abort(message: &str) {
+    write(ERROR, message);
+}
 
 fn write(log_level: &str, msg: &str) {
     serial_print(log_level);
