@@ -1,4 +1,4 @@
-use crate::serial;
+use crate::log::*;
 
 #[repr(packed)]
 pub struct GdtPointer {
@@ -70,6 +70,6 @@ pub fn gdt_init() {
         };
 
         load_gdt(&GDT_POINTER as *const _);
-        serial::serial_print("GDT Loaded without triple fault OwO")
+        info("GDT Loaded without triple fault OwO");
     }
 }

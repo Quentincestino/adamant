@@ -1,4 +1,4 @@
-use serial::serial_print;
+use crate::log::*;
 
 #[repr(packed)]
 pub struct IdtPointer {
@@ -105,6 +105,6 @@ pub fn idt_init() {
         IDT[0].set_function(interrupts::divide_by_zero);
         load_idt(&IDT_POINTER as *const _);
         asm!("sti");
-        serial_print("IDT Loaded without triple fault UwU");
+        info("IDT Loaded without triple fault UwU");
     }
 }

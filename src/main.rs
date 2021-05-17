@@ -5,16 +5,19 @@
 
 mod arch;
 mod header;
+mod log;
 mod serial;
 
 use core::panic::PanicInfo;
+use log::*;
 
 #[no_mangle]
 extern "C" fn entry_point(_header_addr: usize) -> ! {
-    serial::serial_print("Salut ça gaze ?");
+    ok("Salut ça gaze ?");
     arch::x86::arch_init();
     unsafe {
         asm!("int 0");
+        info("ECHO");
     }
     loop {}
 }

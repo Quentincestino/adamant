@@ -1,7 +1,8 @@
 use crate::serial;
 
 use super::idt::*;
+use crate::log::*;
 
 pub extern "x86-interrupt" fn divide_by_zero(isf: InterruptStackFrame) {
-    serial::serial_print("Wait nibba did you rly divide by zero ?");
+    error("Wait nibba did you rly divide by zero ?", false);
 }
