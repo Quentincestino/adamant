@@ -24,6 +24,9 @@ extern "C" fn entry_point(_header_addr: usize) -> ! {
 
 #[panic_handler]
 fn panic(_infos: &PanicInfo) -> ! {
-    serial::serial_print("Yo nibba looks like you did a dogshit wow!");
+    error(
+        "y0 nibba looks like you shitted something if you are here now",
+        true,
+    );
     loop {}
 }
