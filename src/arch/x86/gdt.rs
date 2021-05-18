@@ -71,5 +71,6 @@ pub fn gdt_init() -> *const [Segment; GDT_ENTRIES] {
 
         load_gdt(&GDT_POINTER as *const _);
         info("GDT Loaded without triple fault OwO");
+        &GDT as *const _
     }
 }
