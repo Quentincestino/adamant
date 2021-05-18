@@ -56,7 +56,7 @@ static mut GDT_POINTER: GdtPointer = GdtPointer { len: 0, addr: 0 };
 const CODE_GRANULARITY: u8 = 0b1111_1000_;
 const DATA_GRANULARITY: u8 = 0b1111_0000_;
 
-pub fn gdt_init() {
+pub fn gdt_init() -> *const [Segment; GDT_ENTRIES] {
     unsafe {
         GDT[0] = Segment::null(); // Null segment
         GDT[1] = Segment::new(0b10011010, CODE_GRANULARITY); // Kernel Code
