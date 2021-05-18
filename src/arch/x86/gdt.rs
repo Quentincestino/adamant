@@ -53,8 +53,8 @@ static mut GDT: [Segment; GDT_ENTRIES] = [Segment::null(); GDT_ENTRIES];
 static mut GDT_POINTER: GdtPointer = GdtPointer { len: 0, addr: 0 };
 
 // We use only two values for granularity on the GDT so let's setup some consts
-const CODE_GRANULARITY: u8 = /*Limit High */0b1111_0101/*Granularity*/;
-const DATA_GRANULARITY: u8 = /*Limit High */0b1111_0001/*Granularity*/;
+const CODE_GRANULARITY: u8 = 0b1111_1000_;
+const DATA_GRANULARITY: u8 = 0b1111_0000_;
 
 pub fn gdt_init() {
     unsafe {
