@@ -29,7 +29,7 @@ const DEFAULT_COM: SerialPort = SerialPort::COM1;
 pub fn serial_print(string: &str) {
     for c in string.as_bytes() {
         while !serial_available(DEFAULT_COM) {} // Waits for serial to be available
-        outb(DEFAULT_COM, *c);
+        serial_outb(c);
     }
 }
 
@@ -45,4 +45,9 @@ fn serial_available(serial: SerialPort) -> bool {
     let addr = (serial as u16 + 5) as u16;
     let val = inb(addr);
     (val & 0x20) == 32
+}
+
+// Writes a byte on the port
+pub fn serial_outb(byte: u8) {
+    outb(DEFAULT_COM, byte);
 }
