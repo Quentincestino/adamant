@@ -96,7 +96,28 @@ static mut IDT_POINTER: IdtPointer = IdtPointer { len: 0, addr: 0 };
 
 pub fn idt_init() {
     unsafe {
-        asm!("cli");
+        IDT[0] = IdtDescriptor::trap32(divide_by_zero);
+        IDT[1] = IdtDescriptor::trap32(debug);
+        IDT[2] = IdtDescriptor::trap32(nmi);
+        IDT[3] = IdtDescriptor::trap32(breakpoint);
+        IDT[4] = IdtDescriptor::trap32(overflow);
+        IDT[5] = IdtDescriptor::trap32(table_overflow);
+        IDT[6] = IdtDescriptor::trap32(invalid_instruction);
+        IDT[7] = IdtDescriptor::trap32(unavailable_device);
+        IDT[8] = IdtDescriptor::trap32(double_fault);
+        IDT[9] = IdtDescriptor::trap32(coproc_segment);
+        IDT[10] = IdtDescriptor::trap32(invalid_tss);
+        IDT[11] = IdtDescriptor::trap32(not_present_segment);
+        IDT[12] = IdtDescriptor::trap32(invalid_stack_segment);
+        IDT[13] = IdtDescriptor::trap32(general_protection_fault);
+        IDT[14] = IdtDescriptor::trap32(page_fault);
+        IDT[15] = IdtDescriptor::trap32(reserved_15); // NOT SUPPOSED TO BE HANDLED
+        IDT[16] = IdtDescriptor::trap32(fpu_fault);
+        IDT[17] = IdtDescriptor::trap32(align_fault);
+        IDT[18] = IdtDescriptor::trap32(check_exception);
+        IDT[19] = IdtDescriptor::trap32(simd_exception);
+        IDT[20] = IdtDescriptor::trap32(virtualization_exception);
+
         IDT_POINTER = IdtPointer {
             len: (core::mem::size_of::<[IdtEntry; IDT_ENTRIES]>() - 1) as u16,
             addr: (&IDT as *const _) as u64,
