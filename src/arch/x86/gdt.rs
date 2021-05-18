@@ -31,7 +31,7 @@ impl Segment {
 
     pub const fn new(flags: u8, granularity: u8) -> Self {
         Segment {
-            limit_low: u16::MAX,
+            limit_low: 0,
             base_low: 0,
             base_mid: 0,
             flags: flags,
@@ -41,20 +41,22 @@ impl Segment {
     }
 }
 
+pub struct SegmentSelector(pub u16);
+
 #[link(name = "x86_64_arch")]
 extern "C" {
     fn load_gdt(gdt_descriptor: *const GdtPointer);
 }
 
-const GDT_ENTRIES: usize = 5;
+pub const GDT_ENTRIES: usize = 5;
 
 // Setup the GDT
 static mut GDT: [Segment; GDT_ENTRIES] = [Segment::null(); GDT_ENTRIES];
 static mut GDT_POINTER: GdtPointer = GdtPointer { len: 0, addr: 0 };
 
 // We use only two values for granularity on the GDT so let's setup some consts
-const CODE_GRANULARITY: u8 = 0b1111_1000_;
-const DATA_GRANULARITY: u8 = 0b1111_0000_;
+const CODE_GRANULARITY: u8 = 0b0010_0000;
+const DATA_GRANULARITY: u8 = 0b0000_0000;
 
 pub fn gdt_init() -> *const [Segment; GDT_ENTRIES] {
     unsafe {
@@ -71,6 +73,7 @@ pub fn gdt_init() -> *const [Segment; GDT_ENTRIES] {
 
         load_gdt(&GDT_POINTER as *const _);
         info("GDT Loaded without triple fault OwO");
+
         &GDT as *const _
     }
 }
