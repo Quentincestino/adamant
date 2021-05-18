@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 #![feature(llvm_asm, asm, abi_x86_interrupt)]
-#![allow(unconditional_panic)]
+#![allow(improper_ctypes, unused_attributes, unused_assignments, dead_code)]
 
 mod arch;
 mod header;
