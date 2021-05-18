@@ -6,96 +6,123 @@ pub struct IdtPointer {
     addr: u64,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 #[repr(packed)]
-pub struct IdtEntry {
+pub struct IdtDescriptor {
     offset_low: u16,
     selector: u16,
     ist: u8,
-    attributes: u8,
-    offset_mid: u16,
-    reserved: u8, // DO NOT TOUCH ME OWO
+    type_attr: IdtAttributes,
+    offset_middle: u16,
     offset_high: u32,
-    zero: u32,
+    zero_last: u32,
 }
 
-#[repr(u8)]
-pub enum InterruptTypes {
-    InterruptTrap16 = 0b0111,
-    InterruptGate16 = 0b0110,
-    InterruptGate32 = 0b1110,
-    InterruptTrap32 = 0b1111,
+#[derive(Debug, Clone, Copy)]
+#[repr(packed)]
+pub struct InterruptStackFrame {
+    pub rip: u64,
+    pub cs: u64,
+    pub cflags: u64,
+    pub rsp: usize,
+    pub ss: u64,
 }
 
-type HandlerInterrupt = unsafe extern "x86-interrupt" fn(InterruptStackFrame);
+type IsrFunction = unsafe extern "x86-interrupt" fn(&InterruptStackFrame);
 
-use bitflags::bitflags;
-
-use crate::{arch::x86::interrupts, serial};
-
-bitflags! {
-    pub struct IdtFlags: u8 {
-        const PRESENT = 1 << 7;
-        const RING_0 = 0 << 5;
-        const RING_1 = 1 << 5;
-        const RING_2 = 2 << 5;
-        const RING_3 = 3 << 5;
-        const SS = 1 << 4;
-        const INTERRUPT = 0xE;
-        const TRAP = 0xF;
+impl IdtDescriptor {
+    pub fn new(function: IsrFunction, selector: u16, attr: IdtAttributes) -> Self {
+        let function = function as u64;
+        Self {
+            offset_low: function as u16,
+            selector: selector,
+            ist: 0,
+            type_attr: attr,
+            offset_middle: (function >> 16) as u16,
+            offset_high: (function >> 32) as u32,
+            zero_last: 0,
+        }
     }
-}
 
-impl IdtEntry {
-    pub const fn null() -> Self {
+    // Used for a no-exception ISR
+    pub fn gate32(function: IsrFunction) -> Self {
+        Self::new(
+            function,
+            KERNEL_SEGMENT,
+            IdtAttributes::new(GateType::Gate32, DPL::Ring0),
+        )
+    }
+
+    pub fn trap32(function: IsrFunction) -> Self {
+        Self::new(
+            function,
+            KERNEL_SEGMENT,
+            IdtAttributes::new(GateType::Trap32, DPL::Ring0),
+        )
+    }
+
+    pub const fn zeroed() -> Self {
         Self {
             offset_low: 0,
             selector: 0,
             ist: 0,
-            attributes: 0,
-            offset_mid: 0,
-            reserved: 0,
+            type_attr: IdtAttributes(0),
+            offset_middle: 0,
             offset_high: 0,
-            zero: 0,
+            zero_last: 0,
         }
     }
+}
 
-    fn set_flags(&mut self, flags: IdtFlags) {
-        self.attributes = flags.bits;
+#[repr(u8)]
+pub enum GateType {
+    Trap16 = 0b00000111, // 7
+    Gate16 = 0b00000110, // 6
+    Gate32 = 0b00001110, // 14
+    Trap32 = 0b00001111, // 15
+}
+
+#[repr(u8)]
+pub enum DPL {
+    Ring0 = 0b00000000,
+    Ring1 = 0b00100000,
+    Ring2 = 0b01000000,
+    Ring3 = 0b01100000,
+}
+
+#[derive(Copy, Clone, Default)]
+pub struct IdtAttributes(u8);
+
+const IDT_PRESENT: u8 = 0b1000_0000;
+
+impl IdtAttributes {
+    pub const fn new(gate_type: GateType, dpl: DPL) -> Self {
+        IdtAttributes(gate_type as u8 | dpl as u8 | IDT_PRESENT)
     }
-
-    fn set_offset(&mut self, selector: u16, base: usize) {
-        self.selector = selector;
-        self.offset_low = base as u16;
-        self.offset_mid = (base >> 16) as u16;
-        self.offset_high = (base >> 32) as u32;
-    }
-
-    pub fn set_function(&mut self, handler: HandlerInterrupt) {
-        self.set_flags(IdtFlags::PRESENT | IdtFlags::RING_0 | IdtFlags::INTERRUPT);
-        self.set_offset(8, handler as usize)
+    pub const fn zero() -> Self {
+        IdtAttributes(0)
     }
 }
 
-#[repr(packed)]
-pub struct InterruptStackFrame {
-    pub instruction_pointer: usize,
-    pub code_segment: u64,
-    pub cpu_flags: u64,
-    pub stack_pointer: usize,
-    pub stack_segment: u64,
+#[link_name = "x86_64_arch"]
+extern "C" {
+    fn disable_interrupts();
+    fn enable_interrupts();
+    fn load_idt(idt: *const IdtPointer);
 }
 
-pub unsafe fn load_idt(idtptr: *const IdtPointer) {
-    asm!("lidt [{}]", in(reg) idtptr, options(nostack));
-}
+const MAX_ENTRIES: usize = 21;
+const KERNEL_SEGMENT: u16 = 0x8;
 
-const IDT_ENTRIES: usize = 256;
-static mut IDT: [IdtEntry; IDT_ENTRIES] = [IdtEntry::null(); IDT_ENTRIES];
 static mut IDT_POINTER: IdtPointer = IdtPointer { len: 0, addr: 0 };
+static mut IDT: [IdtDescriptor; MAX_ENTRIES] = [IdtDescriptor::zeroed(); MAX_ENTRIES];
+
+use super::interrupts::*;
 
 pub fn idt_init() {
     unsafe {
+        disable_interrupts();
+
         IDT[0] = IdtDescriptor::trap32(divide_by_zero);
         IDT[1] = IdtDescriptor::trap32(debug);
         IDT[2] = IdtDescriptor::trap32(nmi);
@@ -119,13 +146,13 @@ pub fn idt_init() {
         IDT[20] = IdtDescriptor::trap32(virtualization_exception);
 
         IDT_POINTER = IdtPointer {
-            len: (core::mem::size_of::<[IdtEntry; IDT_ENTRIES]>() - 1) as u16,
+            len: (core::mem::size_of::<[IdtDescriptor; MAX_ENTRIES]>() - 1) as u16,
             addr: (&IDT as *const _) as u64,
         };
 
-        IDT[0].set_function(interrupts::divide_by_zero);
         load_idt(&IDT_POINTER as *const _);
-        asm!("sti");
+        // ...
+        enable_interrupts();
         info("IDT Loaded without triple fault UwU");
     }
 }
