@@ -9,12 +9,12 @@ pub struct GdtPointer {
 #[repr(packed)]
 #[derive(Copy, Clone)]
 pub struct Segment {
-    limit_low: u16,
-    base_low: u16,
-    base_mid: u8,
-    flags: u8,
-    limit_high_and_granularity: u8,
-    base_high: u8,
+    limit_low: u16,                 // Limit Low (Bit 0 to 15)
+    base_low: u16,                  // Base Low (Bit 16 to 31)
+    base_mid: u8,                   // Base Mid (Bit 32 to 39)
+    flags: u8,                      // Access Byte (Bit 40 to 47)
+    limit_high_and_granularity: u8, // Limit high: (Bit 48 to 51) and granularity: (Bit 52 to 55)
+    base_high: u8,                  // Base high 56:63
 }
 
 impl Segment {
