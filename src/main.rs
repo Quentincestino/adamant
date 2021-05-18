@@ -8,16 +8,20 @@ mod header;
 mod log;
 mod serial;
 
+use arch::*;
 use core::panic::PanicInfo;
 use log::*;
 
 #[no_mangle]
 extern "C" fn entry_point(_header_addr: usize) -> ! {
-    ok("Salut ça gaze ?");
-    arch::x86::arch_init();
+    x86::arch_init();
+
     unsafe {
+        x86::bochs_magic_breakpoint();
+        warn("Calling int 0");
         asm!("int 0");
-        info("ECHO");
+
+        info("Post Interrupt");
     }
     loop {}
 }
