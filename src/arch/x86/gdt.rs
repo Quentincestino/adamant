@@ -41,7 +41,7 @@ impl Segment {
     }
 }
 
-#[link(name = "x86_64_gdt")]
+#[link(name = "x86_64_arch")]
 extern "C" {
     fn load_gdt(gdt_descriptor: *const GdtPointer);
 }
