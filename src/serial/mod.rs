@@ -29,7 +29,7 @@ const DEFAULT_COM: SerialPort = SerialPort::COM1;
 pub fn serial_print(string: &str) {
     for c in string.as_bytes() {
         while !serial_available(DEFAULT_COM) {} // Waits for serial to be available
-        serial_outb(c);
+        serial_outb(*c);
     }
 }
 
