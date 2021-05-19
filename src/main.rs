@@ -5,9 +5,9 @@
 
 mod allocator;
 mod arch;
-mod header;
 mod log;
 mod serial;
+mod stivale2;
 
 use arch::*;
 use core::panic::PanicInfo;
@@ -16,8 +16,8 @@ use log::*;
 #[no_mangle]
 extern "C" fn entry_point(stivale2_struct: usize) -> ! {
     x86::arch_init();
-    header::init_stivale2_struct(stivale2_struct);
-
+    stivale2::init_stivale2_struct(stivale2_struct);
+    allocator::init();
     ok("Welcome to Adamant !");
 
     loop {}
