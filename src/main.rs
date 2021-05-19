@@ -3,6 +3,7 @@
 #![feature(llvm_asm, asm, abi_x86_interrupt)]
 #![allow(improper_ctypes, unused_attributes, unused_assignments, dead_code)]
 
+mod allocator;
 mod arch;
 mod header;
 mod log;
@@ -13,16 +14,12 @@ use core::panic::PanicInfo;
 use log::*;
 
 #[no_mangle]
-extern "C" fn entry_point(_header_addr: usize) -> ! {
+extern "C" fn entry_point(stivale2_struct: usize) -> ! {
     x86::arch_init();
+    header::init_stivale2_struct(stivale2_struct);
 
-    unsafe {
-        x86::bochs_magic_breakpoint();
-        warn("Calling int 0");
-        asm!("int 0");
+    ok("Welcome to Adamant !");
 
-        info("Post Interrupt");
-    }
     loop {}
 }
 
