@@ -17,6 +17,7 @@ use log::*;
 extern "C" fn entry_point(stivale2_struct: usize) -> ! {
     x86::arch_init();
     stivale2::set_stivale_addr(stivale2_struct);
+
     allocator::init();
     ok("Welcome to Adamant !");
 
