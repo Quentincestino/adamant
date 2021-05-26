@@ -9,10 +9,6 @@ pub enum SerialPort {
 }
 
 impl core::fmt::Write for SerialPort {
-    fn write_char(&mut self, c: char) -> core::fmt::Result {
-        self.write_str(c.encode_utf8(&mut [0; 4]))
-    }
-
     fn write_fmt(mut self: &mut Self, args: core::fmt::Arguments<'_>) -> core::fmt::Result {
         core::fmt::write(&mut self, args)
     }
@@ -43,9 +39,9 @@ fn inb(addr: u16) -> u8 {
 const DEFAULT_COM: SerialPort = SerialPort::COM1;
 // Prints a string on the DEFAULT_COM port
 pub fn serial_print(string: &str, port: SerialPort) {
-    for c in string.as_bytes() {
+    for c in string.bytes() {
         while !serial_available(DEFAULT_COM) {} // Waits for serial to be available
-        serial_outb(*c, port);
+        serial_outb(c, port);
     }
 }
 
