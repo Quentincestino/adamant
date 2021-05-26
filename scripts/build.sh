@@ -1,2 +1,2 @@
 #!/bin/bash
-cargo xbuild
+cargo build
