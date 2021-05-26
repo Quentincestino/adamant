@@ -12,7 +12,9 @@ use core::panic::PanicInfo;
 fn panic(infos: &PanicInfo) -> ! {
     // We gonna get theses args but we still need to pattern match these values
     match (infos.location(), infos.message()) {
-        (Some(location), Some(message)) => kernel_panic!("Panic at {}: {}", location, message),
+        (Some(location), Some(message)) => {
+            kernel_panic!("Panic at {}: {}", location, message.clone())
+        }
         _ => unreachable!(),
     }
     unsafe {
