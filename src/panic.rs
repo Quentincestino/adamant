@@ -7,6 +7,8 @@ macro_rules! kernel_panic {
 
 use core::panic::PanicInfo;
 
+use crate::arch::x86;
+
 #[panic_handler]
 fn panic(infos: &PanicInfo) -> ! {
     // We gonna get theses args but we still need to pattern match these values
@@ -16,13 +18,8 @@ fn panic(infos: &PanicInfo) -> ! {
         }
         _ => unreachable!(),
     }
-    unsafe {
-        // Anyway if there is an error, we gonna die no matter what
-        asm!("cli");
-
-        loop {
-            // If we don't halt cpu just gonna die
-            asm!("hlt");
-        }
+    loop {
+        // If we don't halt cpu just gonna die
+        x86::painless_halt();
     }
 }
