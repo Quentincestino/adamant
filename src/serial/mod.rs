@@ -1,10 +1,22 @@
 #[allow(dead_code)]
 #[repr(u16)]
+#[derive(Copy, Clone)]
 pub enum SerialPort {
     COM1 = 0x3F8,
     COM2 = 0x2A8,
     COM3 = 0x3E8,
     COM4 = 0x2E8,
+}
+
+impl core::fmt::Write for SerialPort {
+    fn write_fmt(mut self: &mut Self, args: core::fmt::Arguments<'_>) -> core::fmt::Result {
+        core::fmt::write(&mut self, args)
+    }
+
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        serial_print(s, *self);
+        core::fmt::Result::Ok(())
+    }
 }
 
 // OUT
@@ -26,10 +38,10 @@ fn inb(addr: u16) -> u8 {
 // The default COM port that we use.
 const DEFAULT_COM: SerialPort = SerialPort::COM1;
 // Prints a string on the DEFAULT_COM port
-pub fn serial_print(string: &str) {
-    for c in string.as_bytes() {
+pub fn serial_print(string: &str, port: SerialPort) {
+    for c in string.bytes() {
         while !serial_available(DEFAULT_COM) {} // Waits for serial to be available
-        serial_outb(*c);
+        serial_outb(c, port);
     }
 }
 
@@ -48,6 +60,6 @@ fn serial_available(serial: SerialPort) -> bool {
 }
 
 // Writes a byte on the port
-pub fn serial_outb(byte: u8) {
-    outb(DEFAULT_COM, byte);
+pub fn serial_outb(byte: u8, port: SerialPort) {
+    outb(port, byte);
 }

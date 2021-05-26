@@ -1,42 +1,56 @@
-// TODO: Prefix colors
-// https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
-use crate::serial::*;
+use crate::serial::SerialPort;
 
-const OK: &str = "[ OK ]    ";
-pub fn ok(message: &str) {
-    write(OK, message);
+use core::fmt::{Arguments, Write};
+
+pub enum LogLevel {
+    Info,
+    Ok,
+    Warn,
+    Error,
+    Panic,
 }
 
-const INFO: &str = "[ INFO ]  ";
-pub fn info(message: &str) {
-    write(INFO, message);
+pub static mut LOG_COM: SerialPort = SerialPort::COM1;
+
+pub fn log(level: LogLevel, message: Arguments) {
+    let message_head = match level {
+        LogLevel::Info => "[ INFO ] ",
+        LogLevel::Ok => "[ OK ] ",
+        LogLevel::Warn => "[ WARN ] ",
+        LogLevel::Error => "[ ERROR ] ",
+        LogLevel::Panic => "[ PANIC ] ",
+    };
+
+    let mut com = unsafe { LOG_COM };
+    let _ = com.write_str(message_head); // We don't care to unwrap
+    let _ = com.write_fmt(message); // Same
+    let _ = com.write_str("\n");
 }
 
-const WARN: &str = "[ WARN ]  ";
-pub fn warn(message: &str) {
-    write(WARN, message);
+#[macro_export]
+macro_rules! info {
+    ($($arg:tt)*) => {{
+        $crate::log::log($crate::log::LogLevel::Info, ::core::format_args!($($arg)*));
+    }}
 }
 
-const ERROR: &str = "[ ERROR ] ";
-pub fn error(message: &str, panic: bool) {
-    if panic {
-        error_abort(message);
-    } else {
-        error_no_abort(message);
-    }
+#[macro_export]
+macro_rules! ok {
+    ($($arg:tt)*) => {{
+        $crate::log::log($crate::log::LogLevel::Ok, ::core::format_args!($($arg)*));
+    }}
 }
 
-fn error_abort(message: &str) {
-    write(ERROR, message);
-    write(ERROR, "This error will make the kernel panic.");
+#[macro_export]
+macro_rules! warn {
+    ($($arg:tt)*) => {{
+        $crate::log::log($crate::log::LogLevel::Warn, ::core::format_args!($($arg)*));
+    }}
 }
 
-fn error_no_abort(message: &str) {
-    write(ERROR, message);
-}
-
-fn write(log_level: &str, msg: &str) {
-    serial_print(log_level);
-    serial_print(msg);
-    serial_print("\n");
+#[macro_export]
+macro_rules! error {
+    ($($arg:tt)*) => {{
+        $crate::log::log($crate::log::LogLevel::Error, ::core::format_args!($($arg)*));
+    }}
 }

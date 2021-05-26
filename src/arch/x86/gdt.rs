@@ -1,4 +1,4 @@
-use crate::log::*;
+use crate::info;
 
 #[repr(packed)]
 pub struct GdtPointer {
@@ -41,8 +41,6 @@ impl Segment {
     }
 }
 
-pub struct SegmentSelector(pub u16);
-
 #[link(name = "x86_64_arch")]
 extern "C" {
     fn load_gdt(gdt_descriptor: *const GdtPointer);
@@ -72,6 +70,6 @@ pub fn gdt_init() {
         };
 
         load_gdt(&GDT_POINTER as *const _);
-        info("GDT Loaded without triple fault OwO");
+        info!("GDT Loaded without triple fault OwO");
     }
 }
