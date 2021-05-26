@@ -20,7 +20,8 @@ extern "C" fn entry_point(stivale2_struct: usize) -> ! {
 
     allocator::init();
 
-    panic!("Panic test");
-
-    loop {}
+    loop {
+        // If we don't halt cpu just gonna die
+        arch::x86::painless_halt();
+    }
 }
