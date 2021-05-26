@@ -27,7 +27,7 @@ extern "C" fn entry_point(stivale2_struct: usize) -> ! {
 fn panic(_infos: &PanicInfo) -> ! {
     error(
         "y0 nibba looks like you shitted something if you are here now",
-        true,
+        false,
     );
     loop {}
 }
