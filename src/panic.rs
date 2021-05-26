@@ -1,8 +1,7 @@
 #[macro_export]
 macro_rules! kernel_panic {
     ($($arg:tt)*) => {{
-        $crate::log::log($crate::log::LogLevel::Panic, ::core::format_args!($($arg)*));
-        $crate::serial::serial_print("\n", unsafe { $crate::log::LOG_COM });
+        $crate::log::log($crate::log::LogLevel::Panic, ::core::format_args!($($arg)*), file!(), line!());
     }}
 }
 
