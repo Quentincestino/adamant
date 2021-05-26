@@ -1,6 +1,7 @@
 use crate::serial::SerialPort;
 
-use core::fmt::{rt::v1::Argument, Arguments, Write};
+use ::core::format_args;
+use core::fmt::{Arguments, Write};
 
 pub enum LogLevel {
     Info,
@@ -25,31 +26,31 @@ pub fn log(level: LogLevel, message: Arguments) {
     match level {
         LogLevel::Info => {
             _print_log(
-                core::format_args!("{}{}[ INFO ]{} ", BOLD, INFO_CYAN, ANSI_RESET),
+                format_args!("{}{}[ INFO ]{}  ", BOLD, INFO_CYAN, ANSI_RESET),
                 message,
             );
         }
         LogLevel::Ok => {
             _print_log(
-                core::format_args!("{}{}[ OK ]{} ", BOLD, OK_GREEN, ANSI_RESET),
+                format_args!("{}{}[ OK ]{}    ", BOLD, OK_GREEN, ANSI_RESET),
                 message,
             );
         }
         LogLevel::Warn => {
             _print_log(
-                core::format_args!("{}{}[ WARN ]{} ", BOLD, WARN_YELLOW, ANSI_RESET),
+                format_args!("{}{}[ WARN ]{}  ", BOLD, WARN_YELLOW, ANSI_RESET),
                 message,
             );
         }
         LogLevel::Error => {
             _print_log(
-                core::format_args!("{}{}[ ERROR ]{} ", BOLD, ERROR_RED, ANSI_RESET),
+                format_args!("{}{}[ ERROR ]{} ", BOLD, ERROR_RED, ANSI_RESET),
                 message,
             );
         }
         LogLevel::Panic => {
             _print_log(
-                core::format_args!("{}{}[ PANIC ]{} ", BOLD, PANIC_MAGENTA, ANSI_RESET),
+                format_args!("{}{}[ PANIC ]{} ", BOLD, PANIC_MAGENTA, ANSI_RESET),
                 message,
             );
         }
