@@ -6,6 +6,7 @@
 mod allocator;
 mod arch;
 mod log;
+mod panic;
 mod serial;
 mod stivale2;
 
