@@ -6,7 +6,6 @@ macro_rules! kernel_panic {
     }}
 }
 
-use crate::arch::x86::{disable_interrupts, halt};
 use core::panic::PanicInfo;
 
 #[panic_handler]
@@ -16,11 +15,13 @@ fn panic(infos: &PanicInfo) -> ! {
         (Some(location), Some(message)) => kernel_panic!("Panic at {}: {}", location, message),
         _ => unreachable!(),
     }
+    unsafe {
+        // Anyway if there is an error, we gonna die no matter what
+        asm!("cli");
 
-    loop {
-        // Anyway if there is an error, we gonne die no matter what
-        disable_interrupts();
-        // If we don't halt cpu just gonna die
-        halt();
+        loop {
+            // If we don't halt cpu just gonna die
+            asm!("hlt");
+        }
     }
 }
