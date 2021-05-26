@@ -22,72 +22,87 @@ pub const WARN_YELLOW: &str = "\u{001b}[33m";
 pub const ERROR_RED: &str = "\u{001b}[31m";
 pub const PANIC_MAGENTA: &str = "\u{001b}[35m";
 
-pub fn log(level: LogLevel, message: Arguments) {
+pub fn log(level: LogLevel, message: Arguments, file: &str, line: u32) {
     match level {
         LogLevel::Info => {
             _print_log(
                 format_args!("{}{}[ INFO ]{}  ", BOLD, INFO_CYAN, ANSI_RESET),
                 message,
+                file,
+                line,
             );
         }
         LogLevel::Ok => {
             _print_log(
                 format_args!("{}{}[ OK ]{}    ", BOLD, OK_GREEN, ANSI_RESET),
                 message,
+                file,
+                line,
             );
         }
         LogLevel::Warn => {
             _print_log(
                 format_args!("{}{}[ WARN ]{}  ", BOLD, WARN_YELLOW, ANSI_RESET),
                 message,
+                file,
+                line,
             );
         }
         LogLevel::Error => {
             _print_log(
                 format_args!("{}{}[ ERROR ]{} ", BOLD, ERROR_RED, ANSI_RESET),
                 message,
+                file,
+                line,
             );
         }
         LogLevel::Panic => {
             _print_log(
                 format_args!("{}{}[ PANIC ]{} ", BOLD, PANIC_MAGENTA, ANSI_RESET),
                 message,
+                file,
+                line,
             );
         }
     }
 }
 
-pub fn _print_log(prefix: Arguments, msg: Arguments) {
+#[inline(always)]
+pub fn _print_log(prefix: Arguments, msg: Arguments, file: &str, line: u32) {
     let mut com = unsafe { LOG_COM };
-    com.write_fmt(prefix.clone());
-    com.write_fmt(msg.clone());
-    com.write_str("\n");
+    let _ = com.write_fmt(prefix);
+    let _ = com.write_fmt(format_args!(
+        "{}at {}:{}: {}",
+        INFO_CYAN, file, line, ANSI_RESET
+    ));
+    let _ = com.write_fmt(msg);
+    let _ = com.write_str("\n");
 }
 
 #[macro_export]
 macro_rules! info {
     ($($arg:tt)*) => {{
-        $crate::log::log($crate::log::LogLevel::Info, ::core::format_args!($($arg)*));
+        $crate::log::log($crate::log::LogLevel::Info, ::core::format_args!($($arg)*), file!(), line!());
     }}
 }
 
 #[macro_export]
 macro_rules! ok {
     ($($arg:tt)*) => {{
-        $crate::log::log($crate::log::LogLevel::Ok, ::core::format_args!($($arg)*));
+        $crate::log::log($crate::log::LogLevel::Ok, ::core::format_args!($($arg)*), file!(), line!());
     }}
 }
 
 #[macro_export]
 macro_rules! warn {
     ($($arg:tt)*) => {{
-        $crate::log::log($crate::log::LogLevel::Warn, ::core::format_args!($($arg)*));
+        $crate::log::log($crate::log::LogLevel::Warn, ::core::format_args!($($arg)*), file!(), line!());
     }}
 }
 
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {{
-        $crate::log::log($crate::log::LogLevel::Error, ::core::format_args!($($arg)*));
+        $crate::log::log($crate::log::LogLevel::Error, ::core::format_args!($($arg)*), file!(), line!());
     }}
 }
