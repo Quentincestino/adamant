@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir build
 dd if=/dev/zero bs=1M count=0 seek=64 of=build/kernel.img
 parted -s build/kernel.img mklabel msdos
 parted -s build/kernel.img mkpart primary 1 100%
