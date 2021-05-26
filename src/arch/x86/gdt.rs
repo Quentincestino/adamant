@@ -58,7 +58,7 @@ static mut GDT_POINTER: GdtPointer = GdtPointer { len: 0, addr: 0 };
 const CODE_GRANULARITY: u8 = 0b0010_0000;
 const DATA_GRANULARITY: u8 = 0b0000_0000;
 
-pub fn gdt_init() -> *const [Segment; GDT_ENTRIES] {
+pub fn gdt_init() {
     unsafe {
         GDT[0] = Segment::null(); // Null segment
         GDT[1] = Segment::new(0b10011010, CODE_GRANULARITY); // Kernel Code
@@ -73,7 +73,5 @@ pub fn gdt_init() -> *const [Segment; GDT_ENTRIES] {
 
         load_gdt(&GDT_POINTER as *const _);
         info("GDT Loaded without triple fault OwO");
-
-        &GDT as *const _
     }
 }

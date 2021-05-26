@@ -2,11 +2,11 @@ mod gdt;
 mod idt;
 mod interrupts;
 
-use gdt::*;
+use self::{gdt::gdt_init, idt::idt_init};
 
 pub fn arch_init() {
-    let _gdt: *const [Segment; GDT_ENTRIES] = gdt::gdt_init();
-    idt::idt_init();
+    gdt_init();
+    idt_init();
 }
 
 #[inline(always)]
