@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-#![feature(asm, abi_x86_interrupt)]
+#![feature(asm, abi_x86_interrupt, panic_info_message, fmt_internals, lang_items)]
 #![allow(improper_ctypes, unused_attributes, unused_assignments, dead_code)]
 
 mod allocator;
