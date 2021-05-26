@@ -1,4 +1,4 @@
-use crate::log::*;
+use crate::info;
 
 #[repr(packed)]
 pub struct IdtPointer {
@@ -153,6 +153,6 @@ pub fn idt_init() {
         load_idt(&IDT_POINTER as *const _);
         // ...
         enable_interrupts();
-        info("IDT Loaded without triple fault UwU");
+        info!("IDT Loaded without triple fault UwU");
     }
 }
