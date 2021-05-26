@@ -1,5 +1,3 @@
-
-
 use stivale::*;
 
 // The stack used by the kernel
@@ -17,17 +15,12 @@ static STIVALE_HDR: StivaleHeader = StivaleHeader::new(&STACK[4095] as *const u8
 
 static mut STIVALE_STRUCT_ADDR: usize = 0;
 
-pub fn init_stivale2_struct(addr: usize) {
+pub fn set_stivale_addr(addr: usize) {
     unsafe {
         STIVALE_STRUCT_ADDR = addr;
     }
 }
 
-pub fn get_stivale2_structure() -> &'static StivaleStructure {
-    unsafe {
-        assert!(STIVALE_STRUCT_ADDR != 0);
-        (STIVALE_STRUCT_ADDR as *const StivaleStructure)
-            .as_ref()
-            .unwrap()
-    }
+pub fn stivale_struct() -> StivaleStructure {
+    unsafe { stivale::load(STIVALE_STRUCT_ADDR) }
 }
