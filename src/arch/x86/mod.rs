@@ -15,3 +15,13 @@ pub fn bochs_magic_breakpoint() {
         asm!("xchg bx, bx");
     }
 }
+
+#[inline(always)]
+pub fn painless_halt() {
+    unsafe {
+        crate::warn!("Entered on a painless halt, something went wrong ?");
+
+        asm!("cli");
+        asm!("hlt");
+    }
+}
