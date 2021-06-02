@@ -67,16 +67,13 @@ pub fn log(level: LogLevel, message: Arguments, file: &str, line: u32) {
     }
 }
 
-#[inline(always)]
 pub fn _print_log(prefix: Arguments, msg: Arguments, file: &str, line: u32) {
     let mut com = unsafe { LOG_COM };
     let _ = com.write_fmt(prefix);
     let _ = com.write_fmt(format_args!(
-        "{}at {}:{}: {}",
-        INFO_CYAN, file, line, ANSI_RESET
+        "{}at {}:{}:{} {}\n",
+        INFO_CYAN, file, line, ANSI_RESET, msg
     ));
-    let _ = com.write_fmt(msg);
-    let _ = com.write_str("\n");
 }
 
 #[macro_export]
