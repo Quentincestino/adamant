@@ -27,6 +27,11 @@ fn outb(port: SerialPort, val: u8) {
     }
 }
 
+fn _outb_raw(port: u16, val: u8) {
+    unsafe {
+        asm!("out dx, al", in("dx") port, in("al") val);
+    }
+}
 // IN
 fn inb(addr: u16) -> u8 {
     let mut val = 0u8;
@@ -54,9 +59,9 @@ fn serial_received(serial: SerialPort) -> bool {
 
 // Checks if the serial port received the last byte we sent
 fn serial_available(serial: SerialPort) -> bool {
-    let addr = (serial as u16 + 5) as u16;
-    let val = inb(addr);
-    (val & 0x20) == 32
+    let addr = serial as u16 + 5;
+    let val = inb(addr) & 0x20;
+    val != 0
 }
 
 // Writes a byte on the port
