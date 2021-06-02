@@ -14,7 +14,7 @@ use arch::*;
 
 #[no_mangle]
 extern "C" fn entry_point(stivale2_struct: usize) -> ! {
-    x86::arch_init();
+    x86_64::arch_init();
     ok!("Hello world !");
     stivale2::set_stivale_addr(stivale2_struct);
 
@@ -22,6 +22,6 @@ extern "C" fn entry_point(stivale2_struct: usize) -> ! {
 
     loop {
         // If we don't halt cpu just gonna die
-        arch::x86::painless_halt();
+        arch::x86_64::painless_halt();
     }
 }
