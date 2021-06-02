@@ -7,7 +7,7 @@ macro_rules! kernel_panic {
 
 use core::panic::PanicInfo;
 
-use crate::arch::x86;
+use crate::arch::x86_64;
 
 #[panic_handler]
 fn panic(infos: &PanicInfo) -> ! {
@@ -20,6 +20,6 @@ fn panic(infos: &PanicInfo) -> ! {
     }
     loop {
         // If we don't halt cpu just gonna die
-        x86::painless_halt();
+        x86_64::painless_halt();
     }
 }
