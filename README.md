@@ -1,6 +1,6 @@
 # Adamant
 
-Adamant is a x86 kernel that aims to be a microkernel, POSIX compliant and highly reliable.
+Adamant is a x86_64 kernel that aims to be a microkernel, POSIX compliant and highly reliable.
 
 ## Dependencies
 
