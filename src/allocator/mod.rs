@@ -1,8 +1,11 @@
+use crate::info;
+
+mod bootloaders;
 pub mod mem_map;
 pub mod pmm;
 
-use crate::stivale2::stivale_struct;
-
 pub fn init() {
-    mem_map::stivale2_to_memmap(stivale_struct());
+    let memory_map = mem_map::memory_map();
+    info!("Intiializing the physical memory manager...");
+    pmm::init_pmm(memory_map);
 }
