@@ -56,13 +56,18 @@ static mut GDT_POINTER: GdtPointer = GdtPointer { len: 0, addr: 0 };
 const CODE_GRANULARITY: u8 = 0b0010_0000;
 const DATA_GRANULARITY: u8 = 0b0000_0000;
 
+const KERNEL_CODE: u8 = 0b10011010;
+const KERNEL_DATA: u8 = 0b10010010;
+const USER_CODE: u8 = 0b11111010;
+const USER_DATA: u8 = 0b11110010;
+
 pub fn gdt_init() {
     unsafe {
         GDT[0] = Segment::null(); // Null segment
-        GDT[1] = Segment::new(0b10011010, CODE_GRANULARITY); // Kernel Code
-        GDT[2] = Segment::new(0b10010010, DATA_GRANULARITY); // Kernel Data
-        GDT[3] = Segment::new(0b11111010, CODE_GRANULARITY); // User Code
-        GDT[4] = Segment::new(0b11110010, DATA_GRANULARITY); // User Data
+        GDT[1] = Segment::new(KERNEL_CODE, CODE_GRANULARITY); // Kernel Code
+        GDT[2] = Segment::new(KERNEL_DATA, DATA_GRANULARITY); // Kernel Data
+        GDT[3] = Segment::new(USER_CODE, CODE_GRANULARITY); // User Code
+        GDT[4] = Segment::new(USER_DATA, DATA_GRANULARITY); // User Data
 
         GDT_POINTER = GdtPointer {
             len: (core::mem::size_of::<[Segment; GDT_ENTRIES]>() - 1) as u16,

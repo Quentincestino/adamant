@@ -1,7 +1,9 @@
 use stivale::*;
 
+// The size of the stack used by the kernel
+const STACK_SIZE: usize = 16384;
 // The stack used by the kernel
-static STACK: [u8; 16384] = [0; 16384];
+static STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
 
 // The Stivale2 Tag that initializes the framebuffer
 static FRAMEBUFFER_TAG: HeaderFramebufferTag = HeaderFramebufferTag::new().bpp(24);
@@ -10,7 +12,7 @@ static FRAMEBUFFER_TAG: HeaderFramebufferTag = HeaderFramebufferTag::new().bpp(2
 #[no_mangle]
 #[used]
 // StivaleHeader, used by Limine
-static STIVALE_HDR: StivaleHeader = StivaleHeader::new(&STACK[16383] as *const u8)
+static STIVALE_HDR: StivaleHeader = StivaleHeader::new(&STACK[STACK_SIZE - 1] as *const u8)
     .tags((&FRAMEBUFFER_TAG as *const HeaderFramebufferTag).cast());
 
 static mut STIVALE_STRUCT_ADDR: usize = 0;
